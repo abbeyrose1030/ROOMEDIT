@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#e3ddd4">
+  <title>Room Edit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,520;9..144,640&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="shell">
+    <aside id="sidebar">
+      <div class="side-head">
+        <p class="eyebrow">In the room</p>
+        <h2>Pieces</h2>
+      </div>
+      <div id="piece-list" role="listbox" aria-label="Furniture"></div>
+      <div class="keys">
+        <p>Drag a piece to move it.</p>
+        <p>Drag the yellow ring, or press Q and E, to rotate.</p>
+        <p>Right-drag to look around. Scroll to zoom.</p>
+        <p>Arrow keys nudge. Shift snaps while you drag. ⌘Z undoes.</p>
+      </div>
+    </aside>
+    <div id="stage">
+      <canvas id="view" aria-label="Studio loft. Select furniture and drag to rearrange it."></canvas>
+      <header>
+        <div class="brand">
+          <p class="eyebrow">Studio loft</p>
+          <h1>Room Edit</h1>
+        </div>
+        <div class="toolbar">
+          <div class="seg" role="group" aria-label="Camera">
+            <button id="cam-doll" class="on" type="button">Dollhouse</button>
+            <button id="cam-top" type="button">Overhead</button>
+          </div>
+          <button id="snap" type="button" aria-pressed="false" title="Snap to a grid. Hold Shift while dragging to flip this.">Snap</button>
+          <button id="undo" type="button" disabled title="Undo (⌘Z)">Undo</button>
+          <button id="reset" type="button">Reset</button>
+          <button id="photos" type="button" aria-pressed="false" title="Show the reference photos">Photos</button>
+        </div>
+      </header>
+      <div id="refpanel" hidden>
+        <figure>
+          <img src="MAIN.png" alt="Front three-quarter view of the studio">
+          <figcaption>Front view</figcaption>
+        </figure>
+        <figure>
+          <img src="angle2.png" alt="High angle view of the studio">
+          <figcaption>High angle</figcaption>
+        </figure>
+      </div>
+      <div id="dock" hidden>
+        <div class="dock-copy">
+          <strong id="sel-name">Piece</strong>
+          <span id="sel-angle"></span>
+        </div>
+        <div class="rot-btns">
+          <button id="rot-l" type="button" title="Rotate left (Q)">Rotate left</button>
+          <button id="rot-r" type="button" title="Rotate right (E)">Rotate right</button>
+        </div>
+        <p id="sel-help">Drag to move. Drag the yellow ring to rotate.</p>
+      </div>
+      <p id="hint">Click a piece of furniture, then drag it around the room. Drag the yellow ring to rotate it.</p>
+    </div>
+  </div>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./node_modules/three/build/three.module.js",
+      "three/addons/": "./node_modules/three/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

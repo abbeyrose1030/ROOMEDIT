@@ -1,0 +1,11 @@
+{
+  "name": "room-edit",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "start": "python3 -m http.server 5173"
+  },
+  "dependencies": {
+    "three": "^0.170.0"
+  }
+}
