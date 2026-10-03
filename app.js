@@ -46,9 +46,11 @@ controls.enableDamping = !reduceMotion;
 controls.dampingFactor = 0.08;
 controls.maxPolarAngle = Math.PI / 2 - 0.05;
 controls.minPolarAngle = 0.08;
-controls.minDistance = 2.2;
-controls.maxDistance = 14;
-controls.zoomToCursor = true;
+controls.minDistance = 2.4;
+controls.maxDistance = 8;
+controls.zoomToCursor = false;
+controls.cursor.set(ROOM_W / 2, 0.55, ROOM_D * 0.42);
+controls.maxTargetRadius = 0.85;
 controls.mouseButtons = {
   LEFT: THREE.MOUSE.ROTATE,
   MIDDLE: THREE.MOUSE.DOLLY,
@@ -1289,6 +1291,14 @@ window.addEventListener("pointerup", onPointerUp);
 window.addEventListener("pointercancel", onPointerUp);
 window.addEventListener("keydown", onKeyDown);
 window.addEventListener("keyup", onKeyUp);
+for (const name of ["gesturestart", "gesturechange", "gestureend"]) {
+  document.addEventListener(name, (event) => event.preventDefault(), { passive: false });
+}
+window.addEventListener("touchmove", (event) => {
+  const el = event.target instanceof Element ? event.target : event.target.parentElement;
+  const scrolling = event.touches.length === 1 && el?.closest("#piece-list, .toolbar");
+  if (!scrolling) event.preventDefault();
+}, { passive: false });
 controls.addEventListener("start", () => {
   camAnim.t = 1;
   userOrbit = true;

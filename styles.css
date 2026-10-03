@@ -20,6 +20,9 @@ html, body {
   font-family: Outfit, "Avenir Next", system-ui, sans-serif;
   font-size: 15px;
   overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+  -webkit-text-size-adjust: 100%;
 }
 
 button, input { font: inherit; color: inherit; }
@@ -70,6 +73,7 @@ h2 { font-size: 26px; margin-top: 2px; }
   gap: 2px;
   padding-right: 4px;
   min-height: 0;
+  touch-action: pan-y;
 }
 
 .piece {
@@ -138,6 +142,7 @@ header {
   gap: 8px;
   pointer-events: auto;
   max-width: min(640px, 72%);
+  touch-action: pan-x;
 }
 
 button {
@@ -310,8 +315,10 @@ body.is-rot, body.is-rot * { cursor: crosshair !important; }
     flex-direction: row;
     flex-wrap: nowrap;
     overflow-x: auto;
+    overflow-y: hidden;
     gap: 6px;
     padding-bottom: 2px;
+    touch-action: pan-x;
   }
   .piece {
     width: auto;
