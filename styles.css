@@ -100,16 +100,6 @@ h2 { font-size: 26px; margin-top: 2px; }
 
 .piece span:last-child { font-weight: 500; }
 
-.keys {
-  margin-top: auto;
-  padding: 16px 8px 0;
-  color: var(--muted);
-  font-size: 12.5px;
-  line-height: 1.45;
-}
-
-.keys p { margin: 0 0 6px; }
-
 #stage {
   position: relative;
   flex: 1;
@@ -296,7 +286,6 @@ body.is-rot, body.is-rot * { cursor: crosshair !important; }
     border-top: 1px solid var(--line);
     padding: 8px 10px 10px;
   }
-  .keys { display: none; }
   .side-head { display: none; }
   #piece-list {
     flex-direction: row;
