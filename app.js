@@ -56,7 +56,7 @@ controls.mouseButtons = {
 };
 controls.touches = {
   ONE: THREE.TOUCH.ROTATE,
-  TWO: THREE.TOUCH.DOLLY_PAN,
+  TWO: THREE.TOUCH.DOLLY_ROTATE,
 };
 
 const pmrem = new THREE.PMREMGenerator(renderer);
@@ -831,6 +831,9 @@ const hitPoint = new THREE.Vector3();
 let gesture = null;
 let miss = false;
 let moved = false;
+const activeTouches = new Map();
+let swallowedTouch = false;
+let pinching = false;
 let downX = 0;
 let downY = 0;
 let dragDX = 0;
@@ -1051,7 +1054,50 @@ function rotateSelected(angle, event) {
   updateReadout();
 }
 
+function rememberTouch(event) {
+  activeTouches.set(event.pointerId, { x: event.pageX, y: event.pageY });
+}
+
+function cancelFurnitureGesture() {
+  if (beforePose) applyPose(beforePose);
+  beforePose = null;
+  gesture = null;
+  miss = false;
+  controls.enabled = true;
+  document.body.classList.remove("is-drag", "is-rot");
+  for (const id of activeTouches.keys()) {
+    if (canvas.hasPointerCapture?.(id)) canvas.releasePointerCapture(id);
+  }
+}
+
+function beginPinch(event) {
+  pinching = true;
+  if (swallowedTouch || gesture) cancelFurnitureGesture();
+  if (swallowedTouch) {
+    for (const [id, pos] of activeTouches) {
+      if (id === event.pointerId) continue;
+      controls._onPointerDown({
+        pointerId: id,
+        pointerType: "touch",
+        button: 0,
+        pageX: pos.x,
+        pageY: pos.y,
+        clientX: pos.x,
+        clientY: pos.y,
+      });
+    }
+    swallowedTouch = false;
+  }
+}
+
 function onPointerDown(event) {
+  if (event.pointerType === "touch") {
+    rememberTouch(event);
+    if (activeTouches.size >= 2) {
+      beginPinch(event);
+      return;
+    }
+  }
   if (event.button !== 0) return;
   downX = event.clientX;
   downY = event.clientY;
@@ -1063,8 +1109,9 @@ function onPointerDown(event) {
   }
   event.preventDefault();
   event.stopPropagation();
+  if (event.pointerType === "touch") swallowedTouch = true;
   controls.enabled = false;
-  canvas.setPointerCapture(event.pointerId);
+  try { canvas.setPointerCapture(event.pointerId); } catch (err) { /* pointer already released */ }
   beginGesture();
   if (pick.kind === "ring") {
     const point = floorPoint(event);
@@ -1086,6 +1133,10 @@ function onPointerDown(event) {
 }
 
 function onPointerMove(event) {
+  if (event.pointerType === "touch" && activeTouches.has(event.pointerId)) {
+    activeTouches.set(event.pointerId, { x: event.pageX, y: event.pageY });
+  }
+  if (pinching) return;
   if (miss && Math.hypot(event.clientX - downX, event.clientY - downY) > 4) moved = true;
   if (!gesture) {
     if (event.target !== canvas) return;
@@ -1101,6 +1152,19 @@ function onPointerMove(event) {
 }
 
 function onPointerUp(event) {
+  if (event.pointerType === "touch") activeTouches.delete(event.pointerId);
+  if (pinching) {
+    if (activeTouches.size === 0) {
+      pinching = false;
+      swallowedTouch = false;
+      gesture = null;
+      miss = false;
+      controls.enabled = true;
+      document.body.classList.remove("is-drag", "is-rot");
+    }
+    return;
+  }
+  if (event.pointerType === "touch" && activeTouches.size === 0) swallowedTouch = false;
   if (miss && !moved && event.target === canvas) select(null);
   if (gesture) endGesture();
   gesture = null;
@@ -1229,6 +1293,10 @@ controls.addEventListener("start", () => {
   camAnim.t = 1;
   userOrbit = true;
 });
+
+if (matchMedia("(pointer: coarse)").matches || matchMedia("(max-width: 820px)").matches) {
+  hint.textContent = "Drag a piece to move it. Pinch with two fingers to zoom, and drag with two fingers to look around.";
+}
 
 document.getElementById("cam-doll").addEventListener("click", () => goCamera("doll"));
 document.getElementById("cam-top").addEventListener("click", () => goCamera("top"));
