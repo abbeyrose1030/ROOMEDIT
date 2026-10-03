@@ -846,13 +846,36 @@ const PRESETS = {
   top: { pos: [1.4, 5.6, 2.35], target: [1.4, 0, 2.15] },
 };
 
+let viewName = "doll";
+let userOrbit = false;
+
+const PHONE = {
+  doll: { pos: [1.78, 1.72, 4.72], target: [1.32, 0.7, 1.95] },
+  top: { pos: [1.4, 6.2, 2.15], target: [1.4, 0, 2.15] },
+};
+
+function fittedPreset(name) {
+  const preset = camera.aspect < 0.95 ? PHONE[name] : PRESETS[name];
+  return {
+    pos: new THREE.Vector3(...preset.pos),
+    target: new THREE.Vector3(...preset.target),
+  };
+}
+
 function resize() {
-  const w = stage.clientWidth;
-  const h = stage.clientHeight;
+  const w = canvas.clientWidth;
+  const h = canvas.clientHeight;
   if (!w || !h) return;
   camera.aspect = w / h;
+  const fov = camera.aspect < 0.95 ? 48 : 40;
+  if (camera.fov !== fov) camera.fov = fov;
   camera.updateProjectionMatrix();
   renderer.setSize(w, h, false);
+  if (!userOrbit && camAnim.t >= 1) {
+    const fit = fittedPreset(viewName);
+    camera.position.copy(fit.pos);
+    controls.target.copy(fit.target);
+  }
 }
 
 function poseOf() {
@@ -1095,11 +1118,13 @@ function rotateBy(delta) {
 }
 
 function goCamera(name) {
-  const preset = PRESETS[name];
+  viewName = name;
+  userOrbit = false;
+  const fit = fittedPreset(name);
   camAnim.fromP.copy(camera.position);
   camAnim.fromT.copy(controls.target);
-  camAnim.toP.set(...preset.pos);
-  camAnim.toT.set(...preset.target);
+  camAnim.toP.copy(fit.pos);
+  camAnim.toT.copy(fit.target);
   camAnim.t = 0;
   document.getElementById("cam-doll").classList.toggle("on", name === "doll");
   document.getElementById("cam-top").classList.toggle("on", name === "top");
@@ -1191,7 +1216,7 @@ buildLights();
 buildRoom();
 spawnPieces();
 resize();
-new ResizeObserver(resize).observe(stage);
+new ResizeObserver(resize).observe(canvas);
 
 canvas.addEventListener("pointerdown", onPointerDown, { capture: true, passive: false });
 canvas.addEventListener("contextmenu", (event) => event.preventDefault());
@@ -1202,6 +1227,7 @@ window.addEventListener("keydown", onKeyDown);
 window.addEventListener("keyup", onKeyUp);
 controls.addEventListener("start", () => {
   camAnim.t = 1;
+  userOrbit = true;
 });
 
 document.getElementById("cam-doll").addEventListener("click", () => goCamera("doll"));
